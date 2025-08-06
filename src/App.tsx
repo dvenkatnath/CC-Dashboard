@@ -3,7 +3,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { DashboardPanel } from './components/DashboardPanel';
 import { BarChart3Icon, SearchIcon, DatabaseIcon, MessageSquareIcon, DollarSignIcon, UsersIcon, XIcon } from 'lucide-react';
-import ApiService from './services/api';
+import { StaticApiService as ApiService } from './services/staticApi';
 
 // Helper function to format database dates
 const formatDate = (dateString: string | null): string => {

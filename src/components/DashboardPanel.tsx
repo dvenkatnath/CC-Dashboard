@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUpIcon, TrendingDownIcon, MoreVerticalIcon, XIcon } from 'lucide-react';
-import ApiService from '../services/api';
+import { StaticApiService as ApiService } from '../services/staticApi';
 type Status = 'development' | 'testing' | 'implemented' | 'uat';
 interface DashboardPanelProps {
   title: string;
