@@ -126,8 +126,7 @@ export function App() {
               }
             }
             
-            if (columnHeader.includes('eta') || 
-                columnHeader.includes('date') || 
+            if (columnHeader.includes('date') || 
                 columnHeader.includes('due') ||
                 columnHeader.includes('start') ||
                 columnHeader.includes('end')) {
@@ -136,6 +135,14 @@ export function App() {
                 console.log(`Formatting column "${columnHeader}": "${cell}" -> "${formatted}"`);
               }
               return formatted;
+            }
+            
+            // Treat ETA column as text (no date formatting)
+            if (columnHeader.includes('eta')) {
+              if (rowIndex === 1) {
+                console.log(`Treating ETA column as text: "${cell}"`);
+              }
+              return cell?.toString() || '';
             }
             
             // For non-date columns, return as is
@@ -237,8 +244,7 @@ export function App() {
              }
            }
           
-          if (columnHeader.includes('eta') || 
-              columnHeader.includes('date') || 
+          if (columnHeader.includes('date') || 
               columnHeader.includes('due') ||
               columnHeader.includes('start') ||
               columnHeader.includes('end')) {
@@ -247,6 +253,14 @@ export function App() {
               console.log(`Formatting column "${columnHeader}": "${cell}" -> "${formatted}"`);
             }
             return formatted;
+          }
+          
+          // Treat ETA column as text (no date formatting)
+          if (columnHeader.includes('eta')) {
+            if (rowIndex === 1) {
+              console.log(`Treating ETA column as text: "${cell}"`);
+            }
+            return cell?.toString() || '';
           }
           
           // For non-date columns, return as is
