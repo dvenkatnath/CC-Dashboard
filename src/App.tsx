@@ -36,12 +36,18 @@ export function App() {
       try {
         console.log('🔄 Loading Excel file...');
         
-        // Load the latest file
-        const url = `/work-tracker-latest.xlsx`;
+        // Load the Excel file with cache busting
+        const timestamp = new Date().getTime();
+        const url = `/Customer Capital Work Tracker-2.xlsx?t=${timestamp}&refresh=true`;
         console.log('Loading from URL:', url);
         
         const response = await fetch(url, {
           method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
           cache: 'no-store'
         });
         
@@ -83,15 +89,19 @@ export function App() {
         } else {
           console.log('❌ "Order Reconciliation" not found in the data');
           console.log('📋 Current data sample:', data.slice(0, 5));
-          console.log('💡 To get fresh data, run this command in terminal:');
-          console.log('cp "Customer Capital Work Tracker-2.xlsx" "public/work-tracker-latest.xlsx"');
+          console.log('💡 To update Excel data:');
+          console.log('1. Modify your Excel file locally');
+          console.log('2. Upload the new file to Netlify (Files tab)');
+          console.log('3. Click "🔄 Refresh" button again');
         }
         
         setWorkTrackerData(data);
       } catch (error) {
         console.error('❌ Error loading Excel file:', error);
-        console.log('💡 Try running this command in terminal:');
-        console.log('cp "Customer Capital Work Tracker-2.xlsx" "public/work-tracker-latest.xlsx"');
+        console.log('💡 To update Excel data:');
+        console.log('1. Modify your Excel file locally');
+        console.log('2. Upload the new file to Netlify (Files tab)');
+        console.log('3. Click "🔄 Refresh" button again');
       }
     }
     setShowWorkTracker(!showWorkTracker);
@@ -101,21 +111,18 @@ export function App() {
     try {
       console.log('🔄 REFRESHING EXCEL DATA...');
       
-      // Simple copy command
-      const copyCommand = 'cp "Customer Capital Work Tracker-2.xlsx" "public/work-tracker-latest.xlsx"';
-      
-      console.log('📋 Step 1: Run this command in terminal to copy fresh file:');
-      console.log(copyCommand);
-      console.log('');
-      console.log('📋 Step 2: After running the command, click this Refresh button again');
-      console.log('');
-      
-      // Try to load the latest file
-      const url = `/work-tracker-latest.xlsx`;
+      // Load the Excel file with cache busting
+      const timestamp = new Date().getTime();
+      const url = `/Customer Capital Work Tracker-2.xlsx?t=${timestamp}&refresh=true`;
       console.log('Trying to load:', url);
       
       const response = await fetch(url, {
         method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
         cache: 'no-store'
       });
       
@@ -159,13 +166,19 @@ export function App() {
       } else {
         console.log('❌ "Order Reconciliation" not found in the fresh data');
         console.log('📋 Current data sample:', data.slice(0, 5));
-        console.log('💡 Make sure you saved your Excel file before copying it.');
+        console.log('💡 To update Excel data:');
+        console.log('1. Modify your Excel file locally');
+        console.log('2. Upload the new file to Netlify (Files tab)');
+        console.log('3. Click "🔄 Refresh" button again');
       }
       
       setWorkTrackerData(data);
     } catch (error) {
       console.error('❌ Error refreshing Excel file:', error);
-      console.log('💡 Make sure to run the copy command in terminal first.');
+      console.log('💡 To update Excel data:');
+      console.log('1. Modify your Excel file locally');
+      console.log('2. Upload the new file to Netlify (Files tab)');
+      console.log('3. Click "🔄 Refresh" button again');
     }
   };
 
