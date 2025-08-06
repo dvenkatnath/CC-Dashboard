@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Structure Debug</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .column-info { background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .highlight { background-color: #ffffcc; }
+    </style>
+</head>
+<body>
+    <h1>Excel Structure Debug - Find the Real ETA Column</h1>
+    <button onclick="loadExcel()">Load Excel File</button>
+    <div id="output"></div>
+
+    <script>
+        async function loadExcel() {
+            try {
+                const response = await fetch('/Customer Capital Work Tracker-2.xlsx');
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                // Get raw data
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true });
+                
+                let output = '<div class="debug-section">';
+                output += '<h2>📋 All Column Headers:</h2>';
+                output += '<table>';
+                output += '<tr><th>Column Index</th><th>Header Name</th><th>Type</th><th>Contains "eta"?</th></tr>';
+                
+                if (rawData.length > 0) {
+                    rawData[0].forEach((header, index) => {
+                        const headerStr = header?.toString() || '';
+                        const containsEta = headerStr.toLowerCase().includes('eta');
+                        const rowClass = containsEta ? 'highlight' : '';
+                        output += `<tr class="${rowClass}">
+                            <td>${index}</td>
+                            <td>"${headerStr}"</td>
+                            <td>${typeof header}</td>
+                            <td>${containsEta ? '✅ YES' : '❌ NO'}</td>
+                        </tr>`;
+                    });
+                }
+                output += '</table>';
+                output += '</div>';
+                
+                output += '<div class="debug-section">';
+                output += '<h2>🔍 First 5 Data Rows (All Columns):</h2>';
+                output += '<table>';
+                
+                // Add header row
+                if (rawData.length > 0) {
+                    output += '<tr>';
+                    output += '<th>Row</th>';
+                    rawData[0].forEach((header, index) => {
+                        output += `<th>Col ${index}<br>"${header}"</th>`;
+                    });
+                    output += '</tr>';
+                    
+                    // Add data rows
+                    for (let i = 1; i < Math.min(6, rawData.length); i++) {
+                        output += '<tr>';
+                        output += `<td><strong>Row ${i}</strong></td>`;
+                        rawData[i].forEach((cell, index) => {
+                            const cellValue = cell?.toString() || '';
+                            const cellType = typeof cell;
+                            output += `<td title="Type: ${cellType}">${cellValue}</td>`;
+                        });
+                        output += '</tr>';
+                    }
+                }
+                output += '</table>';
+                output += '</div>';
+                
+                output += '<div class="debug-section">';
+                output += '<h2>🎯 Potential Date Columns:</h2>';
+                output += '<ul>';
+                if (rawData.length > 0) {
+                    rawData[0].forEach((header, index) => {
+                        const headerStr = header?.toString().toLowerCase() || '';
+                        if (headerStr.includes('eta') || 
+                            headerStr.includes('date') || 
+                            headerStr.includes('due') ||
+                            headerStr.includes('start') ||
+                            headerStr.includes('end') ||
+                            headerStr.includes('deadline')) {
+                            output += `<li><strong>Column ${index}: "${header}"</strong>`;
+                            
+                            // Show sample values from this column
+                            output += '<ul>';
+                            for (let i = 1; i < Math.min(4, rawData.length); i++) {
+                                const cell = rawData[i][index];
+                                const cellValue = cell?.toString() || '';
+                                const cellType = typeof cell;
+                                output += `<li>Row ${i}: "${cellValue}" (${cellType})</li>`;
+                            }
+                            output += '</ul></li>';
+                        }
+                    });
+                }
+                output += '</ul>';
+                output += '</div>';
+                
+                document.getElementById('output').innerHTML = output;
+            } catch (error) {
+                document.getElementById('output').innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html> 

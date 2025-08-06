@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Debug</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Excel Data Debug</h1>
+    <button onclick="loadExcel()">Load Excel File</button>
+    <div id="output"></div>
+
+    <script>
+        async function loadExcel() {
+            try {
+                const response = await fetch('/Customer Capital Work Tracker-2.xlsx');
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                // Get raw data
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                let output = '<h2>Raw Excel Data:</h2>';
+                output += '<pre>' + JSON.stringify(rawData, null, 2) + '</pre>';
+                
+                // Check headers
+                if (rawData.length > 0) {
+                    output += '<h2>Headers:</h2>';
+                    output += '<ul>';
+                    rawData[0].forEach((header, index) => {
+                        output += `<li>Column ${index}: "${header}" (type: ${typeof header})</li>`;
+                    });
+                    output += '</ul>';
+                    
+                    // Check first few rows
+                    output += '<h2>First 3 Data Rows:</h2>';
+                    for (let i = 1; i < Math.min(4, rawData.length); i++) {
+                        output += `<h3>Row ${i}:</h3><ul>`;
+                        rawData[i].forEach((cell, index) => {
+                            output += `<li>Column ${index}: "${cell}" (type: ${typeof cell})</li>`;
+                        });
+                        output += '</ul>';
+                    }
+                }
+                
+                document.getElementById('output').innerHTML = output;
+            } catch (error) {
+                document.getElementById('output').innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -7,16 +7,51 @@ import * as XLSX from 'xlsx';
 
 // Helper function to format Excel dates
 const formatExcelDate = (value: any): string => {
-  if (typeof value === 'number' && value > 1) {
-    // Excel dates are serial numbers starting from January 1, 1900
-    const excelEpoch = new Date(1900, 0, 1);
-    const date = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    });
+  // Handle different types of date values
+  if (value === null || value === undefined) {
+    return '';
   }
+  
+  // If it's already a string that looks like a date, return as is
+  if (typeof value === 'string') {
+    // Check if it's already a formatted date
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) || /^\d{4}-\d{1,2}-\d{1,2}$/.test(value)) {
+      return value;
+    }
+    // Try to parse as a date string
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+      });
+    }
+    return value;
+  }
+  
+  // If it's a number that could be an Excel date
+  if (typeof value === 'number' && value > 1 && value < 100000) {
+    try {
+      // Excel dates are serial numbers starting from January 1, 1900
+      // Excel incorrectly treats 1900 as a leap year, so we need to adjust
+      const excelEpoch = new Date(1900, 0, 1);
+      const date = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000);
+      
+      // Check if the result is a valid date
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        });
+      }
+    } catch (error) {
+      console.log('Error formatting date:', value, error);
+    }
+  }
+  
+  // Return the original value as string for non-date cells
   return value?.toString() || '';
 };
 export function App() {
@@ -62,16 +97,50 @@ export function App() {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         
-        // Read with date formatting
+        // Read with raw data to preserve Excel date serial numbers
         const rawData = XLSX.utils.sheet_to_json(worksheet, { 
           header: 1,
-          raw: false,
-          dateNF: 'yyyy-mm-dd'
+          raw: true
         }) as any[][];
         
-        // Format dates in the data
-        const data = rawData.map((row: any[]) => 
-          row.map((cell: any) => formatExcelDate(cell))
+        // Format dates in the data - only format specific columns that should contain dates
+        const data = rawData.map((row: any[], rowIndex: number) => 
+          row.map((cell: any, cellIndex: number) => {
+            // Only format date columns (assuming ETA is around column 4-5, adjust as needed)
+            // You can modify these indices based on your Excel structure
+            if (rowIndex === 0) {
+              // Header row - don't format
+              return cell?.toString() || '';
+            }
+            
+            // Check if this looks like a date column (ETA, Due Date, etc.)
+            const headerRow = rawData[0];
+            const columnHeader = headerRow[cellIndex]?.toString().toLowerCase() || '';
+            
+            // Debug: Log column headers for first row
+            if (rowIndex === 1) {
+              console.log(`Column ${cellIndex}: "${columnHeader}" - Value: "${cell}" (type: ${typeof cell})`);
+              // Also log if this column contains names instead of dates
+              if (typeof cell === 'string' && (cell.includes('Dr') || cell.includes('Sakthi') || cell.includes('Venkat'))) {
+                console.log(`⚠️ WARNING: Column "${columnHeader}" contains names, not dates!`);
+              }
+            }
+            
+            if (columnHeader.includes('eta') || 
+                columnHeader.includes('date') || 
+                columnHeader.includes('due') ||
+                columnHeader.includes('start') ||
+                columnHeader.includes('end')) {
+              const formatted = formatExcelDate(cell);
+              if (rowIndex === 1) {
+                console.log(`Formatting column "${columnHeader}": "${cell}" -> "${formatted}"`);
+              }
+              return formatted;
+            }
+            
+            // For non-date columns, return as is
+            return cell?.toString() || '';
+          })
         );
         
         console.log('📊 Excel data loaded:', data.length, 'rows');
@@ -139,16 +208,50 @@ export function App() {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       
-      // Read with date formatting
+      // Read with raw data to preserve Excel date serial numbers
       const rawData = XLSX.utils.sheet_to_json(worksheet, { 
         header: 1,
-        raw: false,
-        dateNF: 'yyyy-mm-dd'
+        raw: true
       }) as any[][];
       
-      // Format dates in the data
-      const data = rawData.map((row: any[]) => 
-        row.map((cell: any) => formatExcelDate(cell))
+      // Format dates in the data - only format specific columns that should contain dates
+      const data = rawData.map((row: any[], rowIndex: number) => 
+        row.map((cell: any, cellIndex: number) => {
+          // Only format date columns (assuming ETA is around column 4-5, adjust as needed)
+          // You can modify these indices based on your Excel structure
+          if (rowIndex === 0) {
+            // Header row - don't format
+            return cell?.toString() || '';
+          }
+          
+          // Check if this looks like a date column (ETA, Due Date, etc.)
+          const headerRow = rawData[0];
+          const columnHeader = headerRow[cellIndex]?.toString().toLowerCase() || '';
+          
+                     // Debug: Log column headers for first row
+           if (rowIndex === 1) {
+             console.log(`Column ${cellIndex}: "${columnHeader}" - Value: "${cell}" (type: ${typeof cell})`);
+             // Also log if this column contains names instead of dates
+             if (typeof cell === 'string' && (cell.includes('Dr') || cell.includes('Sakthi') || cell.includes('Venkat'))) {
+               console.log(`⚠️ WARNING: Column "${columnHeader}" contains names, not dates!`);
+             }
+           }
+          
+          if (columnHeader.includes('eta') || 
+              columnHeader.includes('date') || 
+              columnHeader.includes('due') ||
+              columnHeader.includes('start') ||
+              columnHeader.includes('end')) {
+            const formatted = formatExcelDate(cell);
+            if (rowIndex === 1) {
+              console.log(`Formatting column "${columnHeader}": "${cell}" -> "${formatted}"`);
+            }
+            return formatted;
+          }
+          
+          // For non-date columns, return as is
+          return cell?.toString() || '';
+        })
       );
       
       console.log('📊 Excel data loaded:', data.length, 'rows');
