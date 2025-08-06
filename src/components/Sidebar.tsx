@@ -5,12 +5,24 @@ interface SidebarProps {
   toggleSidebar: () => void;
   onPriceGrabClick?: () => void;
   onRagClick?: () => void;
+  onGAInsightsClick?: () => void;
+  onFinanceAutomationClick?: () => void;
+  onDataWarehouseClick?: () => void;
+  onHRAutomationClick?: () => void;
+  onCXAgenticClick?: () => void;
+  onIntegrationAgenticClick?: () => void;
 }
 export function Sidebar({
   isCollapsed,
   toggleSidebar,
   onPriceGrabClick,
-  onRagClick
+  onRagClick,
+  onGAInsightsClick,
+  onFinanceAutomationClick,
+  onDataWarehouseClick,
+  onHRAutomationClick,
+  onCXAgenticClick,
+  onIntegrationAgenticClick
 }: SidebarProps) {
   const menuItems = [{
     icon: <LayoutDashboardIcon size={20} />,
@@ -22,7 +34,8 @@ export function Sidebar({
     onClick: onPriceGrabClick
   }, {
     icon: <BarChart3Icon size={20} />,
-    label: 'GA Insights'
+    label: 'GA Insights',
+    onClick: onGAInsightsClick
   }, {
     icon: <DatabaseIcon size={20} />,
     label: 'RAG-Service',
@@ -32,10 +45,24 @@ export function Sidebar({
     label: 'dataTalk'
   }, {
     icon: <DollarSignIcon size={20} />,
-    label: 'Fin Automation'
+    label: 'Fin Automation',
+    onClick: onFinanceAutomationClick
+  }, {
+    icon: <DatabaseIcon size={20} />,
+    label: 'Data Warehouse',
+    onClick: onDataWarehouseClick
   }, {
     icon: <UsersIcon size={20} />,
-    label: 'HR Automation'
+    label: 'HR Automation',
+    onClick: onHRAutomationClick
+  }, {
+    icon: <MessageSquareIcon size={20} />,
+    label: 'CX Agentic Framework',
+    onClick: onCXAgenticClick
+  }, {
+    icon: <DatabaseIcon size={20} />,
+    label: 'Integration - Agentic Framework',
+    onClick: onIntegrationAgenticClick
   }, {
     icon: <SettingsIcon size={20} />,
     label: 'Settings'

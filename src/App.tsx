@@ -3,23 +3,14 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { DashboardPanel } from './components/DashboardPanel';
 import { BarChart3Icon, SearchIcon, DatabaseIcon, MessageSquareIcon, DollarSignIcon, UsersIcon, XIcon } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import ApiService from './services/api';
 
-// Helper function to format Excel dates
-const formatExcelDate = (value: any): string => {
-  // Handle different types of date values
-  if (value === null || value === undefined) {
-    return '';
-  }
+// Helper function to format database dates
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return '';
   
-  // If it's already a string that looks like a date, return as is
-  if (typeof value === 'string') {
-    // Check if it's already a formatted date
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value) || /^\d{4}-\d{1,2}-\d{1,2}$/.test(value)) {
-      return value;
-    }
-    // Try to parse as a date string
-    const date = new Date(value);
+  try {
+    const date = new Date(dateString);
     if (!isNaN(date.getTime())) {
       return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
@@ -27,39 +18,31 @@ const formatExcelDate = (value: any): string => {
         day: '2-digit' 
       });
     }
-    return value;
+  } catch (error) {
+    console.log('Error formatting date:', dateString, error);
   }
   
-  // If it's a number that could be an Excel date
-  if (typeof value === 'number' && value > 1 && value < 100000) {
-    try {
-      // Excel dates are serial numbers starting from January 1, 1900
-      // Excel incorrectly treats 1900 as a leap year, so we need to adjust
-      const excelEpoch = new Date(1900, 0, 1);
-      const date = new Date(excelEpoch.getTime() + (value - 2) * 24 * 60 * 60 * 1000);
-      
-      // Check if the result is a valid date
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: '2-digit', 
-          day: '2-digit' 
-        });
-      }
-    } catch (error) {
-      console.log('Error formatting date:', value, error);
-    }
-  }
-  
-  // Return the original value as string for non-date cells
-  return value?.toString() || '';
+  return dateString;
 };
+
 export function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showWorkTracker, setShowWorkTracker] = useState(false);
-  const [workTrackerData, setWorkTrackerData] = useState<any[]>([]);
+  const [workDetailsData, setWorkDetailsData] = useState<any[]>([]);
   const [showPriceGrabModal, setShowPriceGrabModal] = useState(false);
   const [showRagModal, setShowRagModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dbConnectionStatus, setDbConnectionStatus] = useState<string>('checking');
+  
+  // Modal trigger states
+  const [triggerPriceGrabModal, setTriggerPriceGrabModal] = useState(false);
+  const [triggerRagModal, setTriggerRagModal] = useState(false);
+  const [triggerGAInsightsModal, setTriggerGAInsightsModal] = useState(false);
+  const [triggerFinanceAutomationModal, setTriggerFinanceAutomationModal] = useState(false);
+  const [triggerDataWarehouseModal, setTriggerDataWarehouseModal] = useState(false);
+  const [triggerHRAutomationModal, setTriggerHRAutomationModal] = useState(false);
+  const [triggerCXAgenticModal, setTriggerCXAgenticModal] = useState(false);
+  const [triggerIntegrationAgenticModal, setTriggerIntegrationAgenticModal] = useState(false);
   
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -69,253 +52,114 @@ export function App() {
     if (!showWorkTracker) {
       // Load fresh data when opening the tracker
       try {
-        console.log('🔄 Loading Excel file...');
+        console.log('🔄 Loading Customer Capital Work Details from database...');
+        setIsLoading(true);
         
-        // Load the Excel file with cache busting
-        const timestamp = new Date().getTime();
-        const url = `/Customer Capital Work Tracker-2.xlsx?t=${timestamp}&refresh=true`;
-        console.log('Loading from URL:', url);
+        const workDetails = await ApiService.getCustomerCapitalWorkDetails() as any[];
+        console.log('✅ Work Details loaded successfully!', workDetails.length, 'records');
         
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          },
-          cache: 'no-store'
-        });
+        setWorkDetailsData(workDetails);
+        console.log('📊 Work Details data loaded');
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const arrayBuffer = await response.arrayBuffer();
-        console.log('✅ File loaded successfully! Size:', arrayBuffer.byteLength, 'bytes');
-        
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        
-        // Read with raw data to preserve Excel date serial numbers
-        const rawData = XLSX.utils.sheet_to_json(worksheet, { 
-          header: 1,
-          raw: true
-        }) as any[][];
-        
-        // Format dates in the data - only format specific columns that should contain dates
-        const data = rawData.map((row: any[], rowIndex: number) => 
-          row.map((cell: any, cellIndex: number) => {
-            // Only format date columns (assuming ETA is around column 4-5, adjust as needed)
-            // You can modify these indices based on your Excel structure
-            if (rowIndex === 0) {
-              // Header row - don't format
-              return cell?.toString() || '';
-            }
-            
-            // Check if this looks like a date column (ETA, Due Date, etc.)
-            const headerRow = rawData[0];
-            const columnHeader = headerRow[cellIndex]?.toString().toLowerCase() || '';
-            
-            // Debug: Log column headers for first row
-            if (rowIndex === 1) {
-              console.log(`Column ${cellIndex}: "${columnHeader}" - Value: "${cell}" (type: ${typeof cell})`);
-              // Also log if this column contains names instead of dates
-              if (typeof cell === 'string' && (cell.includes('Dr') || cell.includes('Sakthi') || cell.includes('Venkat'))) {
-                console.log(`⚠️ WARNING: Column "${columnHeader}" contains names, not dates!`);
-              }
-            }
-            
-            if (columnHeader.includes('date') || 
-                columnHeader.includes('due') ||
-                columnHeader.includes('start') ||
-                columnHeader.includes('end')) {
-              const formatted = formatExcelDate(cell);
-              if (rowIndex === 1) {
-                console.log(`Formatting column "${columnHeader}": "${cell}" -> "${formatted}"`);
-              }
-              return formatted;
-            }
-            
-            // Treat ETA column as text (no date formatting)
-            if (columnHeader.includes('eta')) {
-              if (rowIndex === 1) {
-                console.log(`Treating ETA column as text: "${cell}"`);
-              }
-              return cell?.toString() || '';
-            }
-            
-            // For non-date columns, return as is
-            return cell?.toString() || '';
-          })
-        );
-        
-        console.log('📊 Excel data loaded:', data.length, 'rows');
-        console.log('📋 First few rows:', data.slice(0, 3));
-        
-        // Check if data contains the expected value
-        const hasExpectedValue = data.some(row => 
-          Array.isArray(row) && row.some(cell => 
-            cell && cell.toString().includes('Order Reconciliation')
-          )
-        );
-        
-        if (hasExpectedValue) {
-          console.log('✅ SUCCESS: Found "Order Reconciliation" in the data!');
-        } else {
-          console.log('❌ "Order Reconciliation" not found in the data');
-          console.log('📋 Current data sample:', data.slice(0, 5));
-          console.log('💡 To update Excel data:');
-          console.log('1. Modify your Excel file locally');
-          console.log('2. Upload the new file to Netlify (Files tab)');
-          console.log('3. Click "🔄 Refresh" button again');
-        }
-        
-        setWorkTrackerData(data);
       } catch (error) {
-        console.error('❌ Error loading Excel file:', error);
-        console.log('💡 To update Excel data:');
-        console.log('1. Modify your Excel file locally');
-        console.log('2. Upload the new file to Netlify (Files tab)');
-        console.log('3. Click "🔄 Refresh" button again');
+        console.error('❌ Error loading work details from database:', error);
+        // Don't set connection status to error if we can still load data
+      } finally {
+        setIsLoading(false);
       }
     }
     setShowWorkTracker(!showWorkTracker);
   };
 
-  const refreshExcelData = async () => {
+  const refreshWorkDetailsData = async () => {
+    setIsLoading(true);
     try {
-      console.log('🔄 REFRESHING EXCEL DATA...');
+      console.log('🔄 REFRESHING WORK DETAILS DATA...');
       
-      // Load the Excel file with cache busting
-      const timestamp = new Date().getTime();
-      const url = `/Customer Capital Work Tracker-2.xlsx?t=${timestamp}&refresh=true`;
-      console.log('Trying to load:', url);
+      const workDetails = await ApiService.getCustomerCapitalWorkDetails() as any[];
+      console.log('✅ Work Details refreshed successfully!', workDetails.length, 'records');
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
-        cache: 'no-store'
-      });
+      setWorkDetailsData(workDetails);
+      console.log('✅ Work Details data refreshed successfully!');
       
-      if (!response.ok) {
-        console.log('❌ File not found. Please run the copy command first.');
-        return;
-      }
-      
-      const arrayBuffer = await response.arrayBuffer();
-      console.log('✅ Fresh file loaded successfully!');
-      console.log('File size:', arrayBuffer.byteLength, 'bytes');
-      
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      
-      // Read with raw data to preserve Excel date serial numbers
-      const rawData = XLSX.utils.sheet_to_json(worksheet, { 
-        header: 1,
-        raw: true
-      }) as any[][];
-      
-      // Format dates in the data - only format specific columns that should contain dates
-      const data = rawData.map((row: any[], rowIndex: number) => 
-        row.map((cell: any, cellIndex: number) => {
-          // Only format date columns (assuming ETA is around column 4-5, adjust as needed)
-          // You can modify these indices based on your Excel structure
-          if (rowIndex === 0) {
-            // Header row - don't format
-            return cell?.toString() || '';
-          }
-          
-          // Check if this looks like a date column (ETA, Due Date, etc.)
-          const headerRow = rawData[0];
-          const columnHeader = headerRow[cellIndex]?.toString().toLowerCase() || '';
-          
-                     // Debug: Log column headers for first row
-           if (rowIndex === 1) {
-             console.log(`Column ${cellIndex}: "${columnHeader}" - Value: "${cell}" (type: ${typeof cell})`);
-             // Also log if this column contains names instead of dates
-             if (typeof cell === 'string' && (cell.includes('Dr') || cell.includes('Sakthi') || cell.includes('Venkat'))) {
-               console.log(`⚠️ WARNING: Column "${columnHeader}" contains names, not dates!`);
-             }
-           }
-          
-          if (columnHeader.includes('date') || 
-              columnHeader.includes('due') ||
-              columnHeader.includes('start') ||
-              columnHeader.includes('end')) {
-            const formatted = formatExcelDate(cell);
-            if (rowIndex === 1) {
-              console.log(`Formatting column "${columnHeader}": "${cell}" -> "${formatted}"`);
-            }
-            return formatted;
-          }
-          
-          // Treat ETA column as text (no date formatting)
-          if (columnHeader.includes('eta')) {
-            if (rowIndex === 1) {
-              console.log(`Treating ETA column as text: "${cell}"`);
-            }
-            return cell?.toString() || '';
-          }
-          
-          // For non-date columns, return as is
-          return cell?.toString() || '';
-        })
-      );
-      
-      console.log('📊 Excel data loaded:', data.length, 'rows');
-      console.log('📋 First few rows:', data.slice(0, 3));
-      
-      // Check if data contains the expected value
-      const hasExpectedValue = data.some(row => 
-        Array.isArray(row) && row.some(cell => 
-          cell && cell.toString().includes('Order Reconciliation')
-        )
-      );
-      
-      if (hasExpectedValue) {
-        console.log('✅ SUCCESS: Found "Order Reconciliation" in the fresh data!');
-      } else {
-        console.log('❌ "Order Reconciliation" not found in the fresh data');
-        console.log('📋 Current data sample:', data.slice(0, 5));
-        console.log('💡 To update Excel data:');
-        console.log('1. Modify your Excel file locally');
-        console.log('2. Upload the new file to Netlify (Files tab)');
-        console.log('3. Click "🔄 Refresh" button again');
-      }
-      
-      setWorkTrackerData(data);
     } catch (error) {
-      console.error('❌ Error refreshing Excel file:', error);
-      console.log('💡 To update Excel data:');
-      console.log('1. Modify your Excel file locally');
-      console.log('2. Upload the new file to Netlify (Files tab)');
-      console.log('3. Click "🔄 Refresh" button again');
+      console.error('❌ Error refreshing work details data:', error);
+      // Don't set connection status to error if we can still load data
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handlePriceGrabClick = () => {
-    setShowPriceGrabModal(true);
+    setTriggerPriceGrabModal(true);
+    // Reset after a short delay to allow the modal to open
+    setTimeout(() => setTriggerPriceGrabModal(false), 100);
   };
 
   const handleRagClick = () => {
-    setShowRagModal(true);
+    setTriggerRagModal(true);
+    setTimeout(() => setTriggerRagModal(false), 100);
   };
 
+  const handleGAInsightsClick = () => {
+    setTriggerGAInsightsModal(true);
+    setTimeout(() => setTriggerGAInsightsModal(false), 100);
+  };
 
+  const handleFinanceAutomationClick = () => {
+    setTriggerFinanceAutomationModal(true);
+    setTimeout(() => setTriggerFinanceAutomationModal(false), 100);
+  };
 
+  const handleDataWarehouseClick = () => {
+    setTriggerDataWarehouseModal(true);
+    setTimeout(() => setTriggerDataWarehouseModal(false), 100);
+  };
 
-  return <div className="flex h-screen w-full bg-gray-50">
+  const handleHRAutomationClick = () => {
+    setTriggerHRAutomationModal(true);
+    setTimeout(() => setTriggerHRAutomationModal(false), 100);
+  };
+
+  const handleCXAgenticClick = () => {
+    setTriggerCXAgenticModal(true);
+    setTimeout(() => setTriggerCXAgenticModal(false), 100);
+  };
+
+  const handleIntegrationAgenticClick = () => {
+    setTriggerIntegrationAgenticModal(true);
+    setTimeout(() => setTriggerIntegrationAgenticModal(false), 100);
+  };
+
+  // Test database connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        // Test the actual endpoint we're using for At a Glance
+        const workDetails = await ApiService.getCustomerCapitalWorkDetails();
+        setDbConnectionStatus(workDetails && workDetails.length > 0 ? 'connected' : 'error');
+      } catch (error) {
+        console.error('Database connection test failed:', error);
+        setDbConnectionStatus('error');
+      }
+    };
+    
+    testConnection();
+  }, []);
+
+  return (
+    <div className="flex h-screen w-full bg-gray-50">
       <Sidebar 
         isCollapsed={isSidebarCollapsed} 
         toggleSidebar={toggleSidebar} 
         onPriceGrabClick={handlePriceGrabClick}
         onRagClick={handleRagClick}
+        onGAInsightsClick={handleGAInsightsClick}
+        onFinanceAutomationClick={handleFinanceAutomationClick}
+        onDataWarehouseClick={handleDataWarehouseClick}
+        onHRAutomationClick={handleHRAutomationClick}
+        onCXAgenticClick={handleCXAgenticClick}
+        onIntegrationAgenticClick={handleIntegrationAgenticClick}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
@@ -328,49 +172,70 @@ export function App() {
               onClick={toggleWorkTracker}
               className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 shadow-sm ${
                 showWorkTracker 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  ? 'bg-green-400 hover:bg-green-500 text-white' 
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
               }`}
-              title={showWorkTracker ? "Hide Work Tracker" : "Show Work Tracker"}
+              title={showWorkTracker ? "Hide Work Details" : "Show Work Details"}
             >
-              {showWorkTracker ? 'Hide Tracker' : 'At a Glance'}
+              {showWorkTracker ? 'Hide List' : 'At a Glance'}
             </button>
           </div>
           
-          {showWorkTracker && workTrackerData.length > 0 && (
+          {showWorkTracker && workDetailsData.length > 0 && (
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">Projects Work Tracker</h2>
-                <button 
-                  onClick={refreshExcelData}
-                  className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md transition-colors duration-200"
-                  title="Refresh Excel data"
-                >
-                  🔄 Refresh
-                </button>
+                <h2 className="text-xl font-semibold text-gray-800">Work Tracker</h2>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={refreshWorkDetailsData}
+                    disabled={isLoading}
+                    className={`px-3 py-1 text-white text-sm rounded-md transition-colors duration-200 ${
+                      isLoading 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-blue-500 hover:bg-blue-600'
+                    }`}
+                    title={isLoading ? "Refreshing..." : "Refresh work details data"}
+                  >
+                    {isLoading ? '⏳ Refreshing...' : '🔄 Refresh'}
+                  </button>
+                  <div className={`px-3 py-1 text-sm rounded-md ${
+                    dbConnectionStatus === 'connected' 
+                      ? 'bg-green-100 text-green-800' 
+                      : dbConnectionStatus === 'error'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {dbConnectionStatus === 'connected' ? '✅ DB Connected' : 
+                     dbConnectionStatus === 'error' ? '❌ DB Error' : '⏳ Checking DB...'}
+                  </div>
+                </div>
               </div>
               <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
-                      {workTrackerData.length > 0 && (
-                        <tr>
-                          {workTrackerData[0].map((header: string, index: number) => (
-                            <th key={index} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      )}
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S#</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Contact</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ETA</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shepardti Owner</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proposal Submitted</th>
+                      </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {workTrackerData.slice(1).map((row: any[], rowIndex: number) => (
+                      {workDetailsData.map((row: any, rowIndex: number) => (
                         <tr key={rowIndex} className="hover:bg-gray-50">
-                          {row.map((cell: any, cellIndex: number) => (
-                            <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {cell}
-                            </td>
-                          ))}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.serial_number}</td>
+                          <td className="px-6 py-4 text-sm text-gray-900">{row.description}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.project_type}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.status}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.customer_contact}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.eta}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.shepardti_owner}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.proposal_submitted}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -379,200 +244,154 @@ export function App() {
               </div>
             </div>
           )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <DashboardPanel 
-              title="Price Grab" 
-              description="Competitive price monitoring and analysis" 
-              icon={<SearchIcon />} 
-              color="bg-blue-500" 
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <DashboardPanel
+              title="Price Grab"
+              description="Competitive pricing analysis tool"
+              icon={<SearchIcon size={24} />}
+              color="bg-blue-500"
               stats={{
-                value: '12,345',
-                label: 'Products tracked'
-              }} 
+                value: "60%",
+                label: "Progress"
+              }}
               change={{
-                value: '+5.3%',
+                value: "+12%",
                 positive: true
-              }} 
-              status="uat"
+              }}
+              status="development"
               onPanelClick={handlePriceGrabClick}
+              triggerModal={triggerPriceGrabModal}
             />
-            <DashboardPanel title="GA Insights" description="Advanced Google Analytics data processing" icon={<BarChart3Icon />} color="bg-purple-500" stats={{
-            value: '2.4M',
-            label: 'Monthly pageviews'
-          }} change={{
-            value: '+12.7%',
-            positive: true
-          }} status="testing" />
-            <DashboardPanel 
-              title="RAG-Service" 
-              description="Retrieval-Augmented Generation AI system" 
-              icon={<DatabaseIcon />} 
-              color="bg-green-500" 
+            
+            <DashboardPanel
+              title="RAG-Service"
+              description="Retrieval Augmented Generation service"
+              icon={<DatabaseIcon size={24} />}
+              color="bg-green-500"
               stats={{
-                value: '98.2%',
-                label: 'Accuracy rate'
-              }} 
+                value: "70%",
+                label: "Progress"
+              }}
               change={{
-                value: '+1.5%',
+                value: "+8%",
                 positive: true
-              }} 
-              status="implemented"
+              }}
+              status="development"
               onPanelClick={handleRagClick}
+              triggerModal={triggerRagModal}
             />
-            <DashboardPanel title="dataTalk" description="Natural language data query platform" icon={<MessageSquareIcon />} color="bg-yellow-500" stats={{
-            value: '5,672',
-            label: 'Queries processed'
-          }} change={{
-            value: '-2.1%',
-            positive: false
-          }} status="development" />
-            <DashboardPanel title="Fin Automation" description="Financial process automation tools" icon={<DollarSignIcon />} color="bg-red-500" stats={{
-            value: '$1.2M',
-            label: 'Cost savings'
-          }} change={{
-            value: '+15.8%',
-            positive: true
-          }} status="testing" />
-            <DashboardPanel title="HR Automation" description="Human resources workflow automation" icon={<UsersIcon />} color="bg-indigo-500" stats={{
-            value: '824',
-            label: 'Hours saved monthly'
-          }} change={{
-            value: '+8.9%',
-            positive: true
-          }} status="implemented" />
+            
+            <DashboardPanel
+              title="GA Insights"
+              description="Google Analytics insights dashboard"
+              icon={<BarChart3Icon size={24} />}
+              color="bg-purple-500"
+              stats={{
+                value: "45%",
+                label: "Progress"
+              }}
+              change={{
+                value: "+5%",
+                positive: true
+              }}
+              status="testing"
+              onPanelClick={handleGAInsightsClick}
+              triggerModal={triggerGAInsightsModal}
+            />
+            
+            <DashboardPanel
+              title="Finance Automation"
+              description="Financial process automation system"
+              icon={<DollarSignIcon size={24} />}
+              color="bg-emerald-500"
+              stats={{
+                value: "35%",
+                label: "Progress"
+              }}
+              change={{
+                value: "+7%",
+                positive: true
+              }}
+              status="development"
+              onPanelClick={handleFinanceAutomationClick}
+              triggerModal={triggerFinanceAutomationModal}
+            />
+            
+            <DashboardPanel
+              title="Data Warehouse"
+              description="Data warehouse and ETL processes"
+              icon={<DatabaseIcon size={24} />}
+              color="bg-orange-500"
+              stats={{
+                value: "20%",
+                label: "Progress"
+              }}
+              change={{
+                value: "+3%",
+                positive: true
+              }}
+              status="development"
+              onPanelClick={handleDataWarehouseClick}
+              triggerModal={triggerDataWarehouseModal}
+            />
+            
+            <DashboardPanel
+              title="HR Automation"
+              description="Human resources process automation"
+              icon={<UsersIcon size={24} />}
+              color="bg-indigo-500"
+              stats={{
+                value: "15%",
+                label: "Progress"
+              }}
+              change={{
+                value: "+2%",
+                positive: true
+              }}
+              status="development"
+              onPanelClick={handleHRAutomationClick}
+              triggerModal={triggerHRAutomationModal}
+            />
+            
+            <DashboardPanel
+              title="CX Agentic Framework"
+              description="Customer experience agentic framework"
+              icon={<MessageSquareIcon size={24} />}
+              color="bg-teal-500"
+              stats={{
+                value: "25%",
+                label: "Progress"
+              }}
+              change={{
+                value: "+4%",
+                positive: true
+              }}
+              status="development"
+              onPanelClick={handleCXAgenticClick}
+              triggerModal={triggerCXAgenticModal}
+            />
+            
+            <DashboardPanel
+              title="Integration - Agentic Framework"
+              description="Integration agentic framework for CRM sync"
+              icon={<DatabaseIcon size={24} />}
+              color="bg-cyan-500"
+              stats={{
+                value: "20%",
+                label: "Progress"
+              }}
+              change={{
+                value: "+3%",
+                positive: true
+              }}
+              status="development"
+              onPanelClick={handleIntegrationAgenticClick}
+              triggerModal={triggerIntegrationAgenticModal}
+            />
           </div>
         </main>
       </div>
-      
-      {/* Global Price Grab Modal */}
-      {showPriceGrabModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Competitive Pricing Analysis
-                </h2>
-                <button 
-                  onClick={() => setShowPriceGrabModal(false)}
-                  className="text-gray-400 hover:text-gray-600 p-1"
-                >
-                  <XIcon size={24} />
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Purpose</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    The software aggregates and compares prices from Amazon, Flipkart, Croma, and Reliance to optimize pricing strategies for enhanced marketability.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Actionable Data</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Provides real-time price comparisons, competitor pricing trends, and demand fluctuations to inform dynamic pricing decisions.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Go-Live Date</h3>
-                  <p className="text-gray-600">
-                    Scheduled for August 16, 2025.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact Points</h3>
-                  <p className="text-gray-600">
-                    Nishant or Ganesh from Customer Capital; Dr. Venkat, Owner from Shepardtri.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Challenges</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Overcomes Amazon's bot detection algorithms using IP rotation and CAPTCHA-solving techniques to discreetly scrape prices.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Status</h3>
-                  <p className="text-gray-600">
-                    Proposal submitted and pending approval.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Global RAG Modal */}
-      {showRagModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Retrieval Augmented Generation (RAG-Service)
-                </h2>
-                <button 
-                  onClick={() => setShowRagModal(false)}
-                  className="text-gray-400 hover:text-gray-600 p-1"
-                >
-                  <XIcon size={24} />
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Purpose</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    The RAG-Service enables users to upload PDF, Word, text, Excel, or PowerPoint documents and query their content for enhanced information retrieval and analysis.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Actionable Data</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Provides accurate, context-aware responses to user queries based on document content, facilitating informed decision-making.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Go-Live Date</h3>
-                  <p className="text-gray-600">
-                    Scheduled for Monday, August 11, 2025.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact Points</h3>
-                  <p className="text-gray-600">
-                    Kushal from Customer Capital; Dr. Venkat from Shepardtri.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Challenges</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Achieves accuracies above 95%, with additional testing required to ensure reliability.
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Status</h3>
-                  <p className="text-gray-600">
-                    Proposal submitted and pending approval.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>;
+    </div>
+  );
 }

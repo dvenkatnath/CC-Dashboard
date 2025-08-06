@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Refresh Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Excel Refresh Test</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test Instructions:</h3>
+        <ol>
+            <li>Click "Test File Access" to check if Excel file is reachable</li>
+            <li>Click "Load Excel Data" to see current data</li>
+            <li>Modify your Excel file locally</li>
+            <li>Upload the new file to Netlify (Files tab)</li>
+            <li>Wait 2-3 minutes for deployment</li>
+            <li>Click "Test Refresh" to see if data changed</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 File Access Test</h3>
+        <button onclick="testFileAccess()" class="btn-primary">Test File Access</button>
+        <div id="fileAccessResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 Data Loading Test</h3>
+        <button onclick="loadExcelData()" class="btn-success">Load Excel Data</button>
+        <button onclick="testRefresh()" class="btn-warning">Test Refresh</button>
+        <div id="dataResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔄 Refresh History</h3>
+        <div id="refreshHistory"></div>
+    </div>
+
+    <script>
+        let lastDataHash = '';
+        let refreshCount = 0;
+
+        async function testFileAccess() {
+            const resultDiv = document.getElementById('fileAccessResult');
+            resultDiv.innerHTML = '<p>Testing file access...</p>';
+            
+            try {
+                const response = await fetch('/Customer Capital Work Tracker-2.xlsx');
+                const headers = response.headers;
+                
+                let result = '<div class="success">';
+                result += '<h4>✅ File Access Successful</h4>';
+                result += '<p><strong>Status:</strong> ' + response.status + '</p>';
+                result += '<p><strong>Content-Type:</strong> ' + headers.get('content-type') + '</p>';
+                result += '<p><strong>Content-Length:</strong> ' + headers.get('content-length') + ' bytes</p>';
+                result += '<p><strong>Last-Modified:</strong> ' + headers.get('last-modified') + '</p>';
+                result += '<p><strong>ETag:</strong> ' + headers.get('etag') + '</p>';
+                result += '</div>';
+                
+                resultDiv.innerHTML = result;
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error"><h4>❌ File Access Failed</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
+        async function loadExcelData() {
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.innerHTML = '<p>Loading Excel data...</p>';
+            
+            try {
+                const timestamp = new Date().getTime();
+                const url = `/Customer Capital Work Tracker-2.xlsx?t=${timestamp}`;
+                
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true });
+                
+                // Create a hash of the data to detect changes
+                const dataString = JSON.stringify(rawData);
+                const dataHash = btoa(dataString).substring(0, 20);
+                
+                let result = '<div class="success">';
+                result += '<h4>✅ Excel Data Loaded</h4>';
+                result += '<p><strong>Rows:</strong> ' + rawData.length + '</p>';
+                result += '<p><strong>Columns:</strong> ' + (rawData[0] ? rawData[0].length : 0) + '</p>';
+                result += '<p><strong>Data Hash:</strong> ' + dataHash + '</p>';
+                result += '<p><strong>First Row:</strong></p>';
+                result += '<pre>' + JSON.stringify(rawData[0], null, 2) + '</pre>';
+                result += '<p><strong>Sample Data (Row 1):</strong></p>';
+                result += '<pre>' + JSON.stringify(rawData[1], null, 2) + '</pre>';
+                result += '</div>';
+                
+                resultDiv.innerHTML = result;
+                lastDataHash = dataHash;
+                
+                addToHistory('Data loaded', dataHash, rawData.length);
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error"><h4>❌ Excel Loading Failed</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
+        async function testRefresh() {
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.innerHTML = '<p>Testing refresh...</p>';
+            
+            try {
+                const timestamp = new Date().getTime();
+                const randomId = Math.random().toString(36).substring(7);
+                const url = `/Customer Capital Work Tracker-2.xlsx?t=${timestamp}&r=${randomId}&refresh=true&nocache=${Date.now()}`;
+                
+                console.log('Testing refresh with URL:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+                        'Pragma': 'no-cache',
+                        'Expires': '0',
+                        'If-Modified-Since': '0',
+                        'If-None-Match': '0'
+                    },
+                    cache: 'no-store'
+                });
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true });
+                
+                // Create a hash of the data to detect changes
+                const dataString = JSON.stringify(rawData);
+                const dataHash = btoa(dataString).substring(0, 20);
+                
+                const isChanged = dataHash !== lastDataHash;
+                
+                let result = '<div class="' + (isChanged ? 'success' : 'info') + '">';
+                result += '<h4>' + (isChanged ? '🔄 Data Changed!' : 'ℹ️ No Changes Detected') + '</h4>';
+                result += '<p><strong>Previous Hash:</strong> ' + lastDataHash + '</p>';
+                result += '<p><strong>Current Hash:</strong> ' + dataHash + '</p>';
+                result += '<p><strong>Changed:</strong> ' + (isChanged ? 'Yes' : 'No') + '</p>';
+                result += '<p><strong>Rows:</strong> ' + rawData.length + '</p>';
+                result += '<p><strong>Sample Data (Row 1):</strong></p>';
+                result += '<pre>' + JSON.stringify(rawData[1], null, 2) + '</pre>';
+                result += '</div>';
+                
+                resultDiv.innerHTML = result;
+                lastDataHash = dataHash;
+                
+                addToHistory('Refresh test', dataHash, rawData.length, isChanged);
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error"><h4>❌ Refresh Test Failed</h4><p>' + error.message + '</p></div>';
+            }
+        }
+
+        function addToHistory(action, hash, rows, changed = false) {
+            refreshCount++;
+            const historyDiv = document.getElementById('refreshHistory');
+            const timestamp = new Date().toLocaleTimeString();
+            const changeIndicator = changed ? ' 🔄' : ' ⏸️';
+            
+            const historyItem = `<div class="info">
+                <strong>#${refreshCount}</strong> ${timestamp} - ${action}${changeIndicator}<br>
+                Hash: ${hash} | Rows: ${rows}
+            </div>`;
+            
+            historyDiv.innerHTML = historyItem + historyDiv.innerHTML;
+        }
+    </script>
+</body>
+</html> 
