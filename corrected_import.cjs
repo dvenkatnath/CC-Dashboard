@@ -130,6 +130,19 @@ const projects = [
       eta: 'February 1, 2026',
       progress_percentage: 10
     }
+  },
+  {
+    name: 'dataTalk',
+    sheetKeywords: ['datatalk', 'data talk'],
+    dbKeywords: ['datatalk', 'data talk'],
+    defaultData: {
+      project_name: 'dataTalk',
+      status: 'development',
+      priority: 'high',
+      assigned_to: 'Srishti',
+      eta: 'TBD',
+      progress_percentage: 85
+    }
   }
 ];
 

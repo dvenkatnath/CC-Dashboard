@@ -44,6 +44,7 @@ export function App() {
   const [triggerHRAutomationModal, setTriggerHRAutomationModal] = useState(false);
   const [triggerCXAgenticModal, setTriggerCXAgenticModal] = useState(false);
   const [triggerIntegrationAgenticModal, setTriggerIntegrationAgenticModal] = useState(false);
+  const [triggerDataTalkModal, setTriggerDataTalkModal] = useState(false);
   
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -133,6 +134,11 @@ export function App() {
   const handleIntegrationAgenticClick = () => {
     setTriggerIntegrationAgenticModal(true);
     setTimeout(() => setTriggerIntegrationAgenticModal(false), 100);
+  };
+
+  const handleDataTalkClick = () => {
+    setTriggerDataTalkModal(true);
+    setTimeout(() => setTriggerDataTalkModal(false), 100);
   };
 
   // Load project data and test database connection on component mount
@@ -232,6 +238,7 @@ export function App() {
         onHRAutomationClick={handleHRAutomationClick}
         onCXAgenticClick={handleCXAgenticClick}
         onIntegrationAgenticClick={handleIntegrationAgenticClick}
+        onDataTalkClick={handleDataTalkClick}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
@@ -460,6 +467,24 @@ export function App() {
               status="development"
               onPanelClick={handleIntegrationAgenticClick}
               triggerModal={triggerIntegrationAgenticModal}
+            />
+            
+            <DashboardPanel
+              title="dataTalk"
+              description="Natural language data query platform"
+              icon={<MessageSquareIcon size={24} />}
+              color="bg-pink-500"
+              stats={{
+                value: `${getProjectProgress('dataTalk')}%`,
+                label: "Progress"
+              }}
+              change={{
+                value: "+15%",
+                positive: true
+              }}
+              status="development"
+              onPanelClick={handleDataTalkClick}
+              triggerModal={triggerDataTalkModal}
             />
           </div>
         </main>

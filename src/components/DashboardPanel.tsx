@@ -142,6 +142,11 @@ export function DashboardPanel({
                 project.project_name.toLowerCase().includes('integration') || 
                 project.project_name.toLowerCase().includes('agentic framework')
               );
+            } else if (title === 'dataTalk') {
+              targetProject = data.find((project: any) => 
+                project.project_name.toLowerCase().includes('datatalk') ||
+                project.project_name.toLowerCase().includes('data talk')
+              );
             }
             
             // If specific project not found, use the first one
@@ -257,6 +262,18 @@ export function DashboardPanel({
         contactPoints: projectData.contact_points || 'CC - Nishit Gandhi ; ST - Thawpeek / Abhinav',
         challenges: projectData.challenges || 'Integration with multiple CRM platforms and ensuring data synchronization accuracy.',
         status: projectData.notes || 'Proposal to be submitted post initial feasibility check',
+        dateUpdated: projectData.date_updated || '06/08/2025'
+      };
+    }
+    if (title === 'dataTalk' && projectData) {
+      return {
+        title: projectData.project_name || 'dataTalk',
+        purpose: projectData.purpose || 'Natural language data query platform',
+        actionableData: projectData.actionable_data || 'Transform the way your business harnesses data with DataTalk—the ultimate web-based platform that redefines data interaction with blazing-fast AI technology!',
+        goLiveDate: projectData.go_live_date || 'Awaiting timelines from CC team for Testing',
+        contactPoints: projectData.contact_points || 'CC - Srishti/Uma ; ST - Dr Venkat',
+        challenges: projectData.challenges || 'Pending approval',
+        status: projectData.notes || 'PoC',
         dateUpdated: projectData.date_updated || '06/08/2025'
       };
     }

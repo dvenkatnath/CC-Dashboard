@@ -11,6 +11,7 @@ interface SidebarProps {
   onHRAutomationClick?: () => void;
   onCXAgenticClick?: () => void;
   onIntegrationAgenticClick?: () => void;
+  onDataTalkClick?: () => void;
 }
 export function Sidebar({
   isCollapsed,
@@ -22,7 +23,8 @@ export function Sidebar({
   onDataWarehouseClick,
   onHRAutomationClick,
   onCXAgenticClick,
-  onIntegrationAgenticClick
+  onIntegrationAgenticClick,
+  onDataTalkClick
 }: SidebarProps) {
   const menuItems = [{
     icon: <LayoutDashboardIcon size={20} />,
@@ -42,7 +44,8 @@ export function Sidebar({
     onClick: onRagClick
   }, {
     icon: <MessageSquareIcon size={20} />,
-    label: 'dataTalk'
+    label: 'dataTalk',
+    onClick: onDataTalkClick
   }, {
     icon: <DollarSignIcon size={20} />,
     label: 'Fin Automation',
