@@ -45,7 +45,7 @@ function exportProjectSynopsis() {
 }
 
 function exportCustomerCapitalWorkDetails() {
-  const query = 'SELECT * FROM Customer_Capital_Work_Details ORDER BY id';
+  const query = 'SELECT * FROM Customer_Capital_Work_Details ORDER BY serial_number';
   
   db.all(query, [], (err, rows) => {
     if (err) {

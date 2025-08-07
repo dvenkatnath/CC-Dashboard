@@ -15,6 +15,45 @@
       "updated_at": "2025-08-07 02:40:18"
     },
     {
+      "id": 73,
+      "serial_number": 2,
+      "description": "RAG - Learning Agent",
+      "project_type": "RAG DB",
+      "status": "UAT",
+      "customer_contact": "Ajay / Kushal",
+      "eta": "01/08/2018",
+      "shepardti_owner": "Dr.Venkat",
+      "proposal_submitted": "POC",
+      "created_at": "2025-08-07 02:40:18",
+      "updated_at": "2025-08-07 02:40:18"
+    },
+    {
+      "id": 74,
+      "serial_number": 3,
+      "description": "GA dashboards",
+      "project_type": "Dashboards",
+      "status": "Ongoing",
+      "customer_contact": "Srishti / Uma",
+      "eta": "14/07/2025",
+      "shepardti_owner": "Sakthi / Denesh",
+      "proposal_submitted": "Yes",
+      "created_at": "2025-08-07 02:40:18",
+      "updated_at": "2025-08-07 02:40:18"
+    },
+    {
+      "id": 75,
+      "serial_number": 4,
+      "description": "Auto Scheduling of reports emails",
+      "project_type": "Dashboards",
+      "status": "Completed",
+      "customer_contact": "Srishti / Uma",
+      "eta": "09/07/2025",
+      "shepardti_owner": "Denesh",
+      "proposal_submitted": "Yes",
+      "created_at": "2025-08-07 02:40:18",
+      "updated_at": "2025-08-07 02:40:18"
+    },
+    {
       "id": 62,
       "serial_number": 5,
       "description": "Data Warehouse ",
@@ -156,47 +195,8 @@
       "proposal_submitted": "PoC",
       "created_at": "2025-08-07 02:40:18",
       "updated_at": "2025-08-07 02:40:18"
-    },
-    {
-      "id": 73,
-      "serial_number": 2,
-      "description": "RAG - Learning Agent",
-      "project_type": "RAG DB",
-      "status": "UAT",
-      "customer_contact": "Ajay / Kushal",
-      "eta": "01/08/2018",
-      "shepardti_owner": "Dr.Venkat",
-      "proposal_submitted": "POC",
-      "created_at": "2025-08-07 02:40:18",
-      "updated_at": "2025-08-07 02:40:18"
-    },
-    {
-      "id": 74,
-      "serial_number": 3,
-      "description": "GA dashboards",
-      "project_type": "Dashboards",
-      "status": "Ongoing",
-      "customer_contact": "Srishti / Uma",
-      "eta": "14/07/2025",
-      "shepardti_owner": "Sakthi / Denesh",
-      "proposal_submitted": "Yes",
-      "created_at": "2025-08-07 02:40:18",
-      "updated_at": "2025-08-07 02:40:18"
-    },
-    {
-      "id": 75,
-      "serial_number": 4,
-      "description": "Auto Scheduling of reports emails",
-      "project_type": "Dashboards",
-      "status": "Completed",
-      "customer_contact": "Srishti / Uma",
-      "eta": "09/07/2025",
-      "shepardti_owner": "Denesh",
-      "proposal_submitted": "Yes",
-      "created_at": "2025-08-07 02:40:18",
-      "updated_at": "2025-08-07 02:40:18"
     }
   ],
-  "timestamp": "2025-08-07T02:40:30.329Z",
+  "timestamp": "2025-08-07T02:43:07.863Z",
   "total": 15
 }
