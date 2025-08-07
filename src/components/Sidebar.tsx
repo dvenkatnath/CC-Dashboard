@@ -73,7 +73,7 @@ export function Sidebar({
   return <aside className={`bg-white border-r border-gray-200 transition-all duration-300 flex flex-col ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         {!isCollapsed && <div className="flex items-center gap-2">
-          <img src="/CC3-bg.png" alt="Customer Capital Logo" className="h-10 w-auto" />
+          <img src="/CC3-bg.png" alt="Customer Capital Logo" className="h-12 w-auto" />
           <span className="font-bold text-xl text-gray-800">Customer Capital</span>
         </div>}
         <button onClick={toggleSidebar} className="p-1 rounded-full hover:bg-gray-100 text-gray-500">
