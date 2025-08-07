@@ -81,9 +81,9 @@ export function DashboardPanel({
     }
   }, [triggerModal, showDetails]);
 
-  // Fetch project data when modal opens
+  // Fetch project data when component loads or modal opens
   useEffect(() => {
-    if (showDetails && (title === 'Price Grab' || title === 'RAG-Service' || title === 'GA Insights' || title === 'Finance Automation' || title === 'Data Warehouse' || title === 'HR Automation' || title === 'CX Agentic Framework' || title === 'Integration - Agentic Framework') && !projectData) {
+    if ((title === 'Price Grab' || title === 'RAG-Service' || title === 'GA Insights' || title === 'Finance Automation' || title === 'Data Warehouse' || title === 'HR Automation' || title === 'CX Agentic Framework' || title === 'Integration - Agentic Framework') && !projectData) {
       const fetchProjectSynopsisData = async () => {
         setIsLoading(true);
         try {
@@ -99,12 +99,12 @@ export function DashboardPanel({
               );
             } else if (title === 'RAG-Service') {
               targetProject = data.find((project: any) => 
-                project.project_name.toLowerCase().includes('rag') || 
-                project.project_name.toLowerCase().includes('retrieval')
+                project.project_name.toLowerCase().includes('retrieval aumented service') ||
+                project.project_name.toLowerCase().includes('rag')
               );
             } else if (title === 'GA Insights') {
               targetProject = data.find((project: any) => 
-                project.project_name.toLowerCase().includes('ga dashboard') ||
+                project.project_name.toLowerCase().includes('ga dashboards') ||
                 project.project_name.toLowerCase().includes('ga')
               );
             } else if (title === 'Finance Automation') {
@@ -113,8 +113,7 @@ export function DashboardPanel({
               );
             } else if (title === 'Data Warehouse') {
               targetProject = data.find((project: any) => 
-                project.project_name.toLowerCase().includes('datawarehouse') ||
-                project.project_name.toLowerCase().includes('data warehouse')
+                project.project_name.toLowerCase().includes('datawarehouse')
               );
             } else if (title === 'HR Automation') {
               targetProject = data.find((project: any) => 
@@ -149,7 +148,7 @@ export function DashboardPanel({
       
       fetchProjectSynopsisData();
     }
-  }, [showDetails, title, projectData]);
+  }, [title, projectData]);
 
   const getProjectDetails = (title: string) => {
     if (title === 'Price Grab' && projectData) {
@@ -320,12 +319,12 @@ export function DashboardPanel({
                             );
                           } else if (title === 'RAG-Service') {
                             targetProject = data.find((project: any) => 
-                              project.project_name.toLowerCase().includes('rag') || 
-                              project.project_name.toLowerCase().includes('retrieval')
+                              project.project_name.toLowerCase().includes('retrieval aumented service') ||
+                              project.project_name.toLowerCase().includes('rag')
                             );
                           } else if (title === 'GA Insights') {
                             targetProject = data.find((project: any) => 
-                              project.project_name.toLowerCase().includes('ga dashboard') ||
+                              project.project_name.toLowerCase().includes('ga dashboards') ||
                               project.project_name.toLowerCase().includes('ga')
                             );
                           } else if (title === 'Finance Automation') {
@@ -334,8 +333,7 @@ export function DashboardPanel({
                             );
                           } else if (title === 'Data Warehouse') {
                             targetProject = data.find((project: any) => 
-                              project.project_name.toLowerCase().includes('datawarehouse') ||
-                              project.project_name.toLowerCase().includes('data warehouse')
+                              project.project_name.toLowerCase().includes('datawarehouse')
                             );
                           } else if (title === 'HR Automation') {
                             targetProject = data.find((project: any) => 
@@ -423,7 +421,7 @@ export function DashboardPanel({
               </div>
               
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Challenges</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Challenges / Remarks</h3>
                 <p className="text-gray-600 leading-relaxed">
                   {getProjectDetails(title)?.challenges}
                 </p>
