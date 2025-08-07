@@ -34,6 +34,7 @@ export function DashboardPanel({
   const [showDetails, setShowDetails] = useState(false);
   const [projectData, setProjectData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [projectMode, setProjectMode] = useState<string>('Development');
   const handleStatusClick = () => {
     // Cycle through statuses: development -> testing -> implemented -> development
     if (currentStatus === 'development') {
@@ -91,56 +92,53 @@ export function DashboardPanel({
             // Find the specific project based on title
             let targetProject = null;
             if (title === 'Price Grab') {
-              targetProject = data.find(project => 
-                project.project_name.toLowerCase().includes('price') || 
-                project.project_name.toLowerCase().includes('pricing') ||
-                project.project_name.toLowerCase().includes('competitive')
+              targetProject = data.find((project: any) => 
+                project.project_name.toLowerCase().includes('price grab') ||
+                project.project_name.toLowerCase().includes('competitive pricing') ||
+                project.project_name.toLowerCase().includes('price')
               );
             } else if (title === 'RAG-Service') {
-              targetProject = data.find(project => 
+              targetProject = data.find((project: any) => 
                 project.project_name.toLowerCase().includes('rag') || 
-                project.project_name.toLowerCase().includes('retrieval') ||
-                project.project_name.toLowerCase().includes('generation')
+                project.project_name.toLowerCase().includes('retrieval')
               );
             } else if (title === 'GA Insights') {
-              targetProject = data.find(project => 
-                project.project_name.toLowerCase().includes('ga') || 
-                project.project_name.toLowerCase().includes('insights') ||
-                project.project_name.toLowerCase().includes('analytics') ||
-                project.project_name.toLowerCase().includes('google')
+              targetProject = data.find((project: any) => 
+                project.project_name.toLowerCase().includes('ga dashboard') ||
+                project.project_name.toLowerCase().includes('ga')
               );
             } else if (title === 'Finance Automation') {
-              targetProject = data.find(project => 
-                project.project_name.toLowerCase() === 'finance automation' ||
+              targetProject = data.find((project: any) => 
                 project.project_name.toLowerCase().includes('finance automation')
               );
             } else if (title === 'Data Warehouse') {
-              targetProject = data.find(project => 
-                project.project_name.toLowerCase() === 'data warehouse' ||
-                project.project_name.toLowerCase().includes('data warehouse') ||
-                project.project_name.toLowerCase().includes('datawarehouse')
+              targetProject = data.find((project: any) => 
+                project.project_name.toLowerCase().includes('datawarehouse') ||
+                project.project_name.toLowerCase().includes('data warehouse')
               );
             } else if (title === 'HR Automation') {
-              targetProject = data.find(project => 
-                project.project_name.toLowerCase() === 'hr automation' ||
-                project.project_name.toLowerCase().includes('hr automation')
+              targetProject = data.find((project: any) => 
+                project.project_name.toLowerCase().includes('hr automation') ||
+                project.project_name.toLowerCase().includes('hr')
               );
             } else if (title === 'CX Agentic Framework') {
-              targetProject = data.find(project => 
-                project.project_name.toLowerCase().includes('cx') || 
-                project.project_name.toLowerCase().includes('agentic') ||
-                project.project_name.toLowerCase().includes('framework')
+              targetProject = data.find((project: any) => 
+                project.project_name.toLowerCase().includes('cx agentic framework')
               );
             } else if (title === 'Integration - Agentic Framework') {
-              targetProject = data.find(project => 
+              targetProject = data.find((project: any) => 
                 project.project_name.toLowerCase().includes('integration') || 
-                project.project_name.toLowerCase().includes('agentic') ||
-                project.project_name.toLowerCase().includes('framework')
+                project.project_name.toLowerCase().includes('agentic framework')
               );
             }
             
             // If specific project not found, use the first one
             setProjectData(targetProject || data[0]);
+            
+            // Set project mode if available
+            if (targetProject && targetProject.mode) {
+              setProjectMode(targetProject.mode);
+            }
           }
         } catch (error) {
           console.error('Error fetching Project Synopsis data:', error);
@@ -272,12 +270,12 @@ export function DashboardPanel({
         </div>
         <h3 className="font-semibold text-lg text-gray-800 mb-1">{title}</h3>
         <p className="text-gray-500 text-sm mb-4">{description}</p>
-        <button onClick={handleStatusClick} className="mb-4 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2">
           <span className={`inline-block w-3 h-3 rounded-full ${getStatusColor(currentStatus)}`}></span>
           <span className="text-sm font-medium text-gray-700">
-            Status: {getStatusText(currentStatus)}
+            Mode: {projectMode}
           </span>
-        </button>
+        </div>
         <div className="flex items-end justify-between">
           <div>
             <div className="text-2xl font-bold text-gray-800">
@@ -315,56 +313,53 @@ export function DashboardPanel({
                           // Find the specific project based on title
                           let targetProject = null;
                           if (title === 'Price Grab') {
-                            targetProject = data.find(project => 
-                              project.project_name.toLowerCase().includes('price') || 
-                              project.project_name.toLowerCase().includes('pricing') ||
-                              project.project_name.toLowerCase().includes('competitive')
+                            targetProject = data.find((project: any) => 
+                              project.project_name.toLowerCase().includes('price grab') ||
+                              project.project_name.toLowerCase().includes('competitive pricing') ||
+                              project.project_name.toLowerCase().includes('price')
                             );
                           } else if (title === 'RAG-Service') {
-                            targetProject = data.find(project => 
+                            targetProject = data.find((project: any) => 
                               project.project_name.toLowerCase().includes('rag') || 
-                              project.project_name.toLowerCase().includes('retrieval') ||
-                              project.project_name.toLowerCase().includes('generation')
+                              project.project_name.toLowerCase().includes('retrieval')
                             );
                           } else if (title === 'GA Insights') {
-                            targetProject = data.find(project => 
-                              project.project_name.toLowerCase().includes('ga') || 
-                              project.project_name.toLowerCase().includes('insights') ||
-                              project.project_name.toLowerCase().includes('analytics') ||
-                              project.project_name.toLowerCase().includes('google')
+                            targetProject = data.find((project: any) => 
+                              project.project_name.toLowerCase().includes('ga dashboard') ||
+                              project.project_name.toLowerCase().includes('ga')
                             );
                           } else if (title === 'Finance Automation') {
-                            targetProject = data.find(project => 
-                              project.project_name.toLowerCase() === 'finance automation' ||
+                            targetProject = data.find((project: any) => 
                               project.project_name.toLowerCase().includes('finance automation')
                             );
                           } else if (title === 'Data Warehouse') {
-                            targetProject = data.find(project => 
-                              project.project_name.toLowerCase() === 'data warehouse' ||
-                              project.project_name.toLowerCase().includes('data warehouse') ||
-                              project.project_name.toLowerCase().includes('datawarehouse')
+                            targetProject = data.find((project: any) => 
+                              project.project_name.toLowerCase().includes('datawarehouse') ||
+                              project.project_name.toLowerCase().includes('data warehouse')
                             );
                           } else if (title === 'HR Automation') {
-                            targetProject = data.find(project => 
-                              project.project_name.toLowerCase() === 'hr automation' ||
-                              project.project_name.toLowerCase().includes('hr automation')
+                            targetProject = data.find((project: any) => 
+                              project.project_name.toLowerCase().includes('hr automation') ||
+                              project.project_name.toLowerCase().includes('hr')
                             );
                           } else if (title === 'CX Agentic Framework') {
-                            targetProject = data.find(project => 
-                              project.project_name.toLowerCase().includes('cx') || 
-                              project.project_name.toLowerCase().includes('agentic') ||
-                              project.project_name.toLowerCase().includes('framework')
+                            targetProject = data.find((project: any) => 
+                              project.project_name.toLowerCase().includes('cx agentic framework')
                             );
                           } else if (title === 'Integration - Agentic Framework') {
-                            targetProject = data.find(project => 
+                            targetProject = data.find((project: any) => 
                               project.project_name.toLowerCase().includes('integration') || 
-                              project.project_name.toLowerCase().includes('agentic') ||
-                              project.project_name.toLowerCase().includes('framework')
+                              project.project_name.toLowerCase().includes('agentic framework')
                             );
                           }
                           
                           // If specific project not found, use the first one
                           setProjectData(targetProject || data[0]);
+                          
+                          // Update project mode
+                          if (targetProject && targetProject.mode) {
+                            setProjectMode(targetProject.mode);
+                          }
                         }
                         setIsLoading(false);
                       }).catch(error => {
@@ -431,6 +426,13 @@ export function DashboardPanel({
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Challenges</h3>
                 <p className="text-gray-600 leading-relaxed">
                   {getProjectDetails(title)?.challenges}
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Mode</h3>
+                <p className="text-gray-600">
+                  {projectMode}
                 </p>
               </div>
               

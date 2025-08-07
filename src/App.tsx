@@ -33,6 +33,7 @@ export function App() {
   const [showRagModal, setShowRagModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [dbConnectionStatus, setDbConnectionStatus] = useState<string>('checking');
+  const [projectData, setProjectData] = useState<any[]>([]);
   
   // Modal trigger states
   const [triggerPriceGrabModal, setTriggerPriceGrabModal] = useState(false);
@@ -53,16 +54,19 @@ export function App() {
       // Load fresh data when opening the tracker
       try {
         console.log('🔄 Loading Customer Capital Work Details from database...');
+        console.log('📍 API Service:', ApiService);
         setIsLoading(true);
         
         const workDetails = await ApiService.getCustomerCapitalWorkDetails() as any[];
-        console.log('✅ Work Details loaded successfully!', workDetails.length, 'records');
+        console.log('✅ Work Details loaded successfully!', workDetails);
+        console.log('📊 Work Details length:', workDetails.length, 'records');
         
         setWorkDetailsData(workDetails);
-        console.log('📊 Work Details data loaded');
+        console.log('📊 Work Details data set in state');
         
       } catch (error) {
         console.error('❌ Error loading work details from database:', error);
+        console.error('❌ Error details:', (error as Error).message);
         // Don't set connection status to error if we can still load data
       } finally {
         setIsLoading(false);
@@ -131,10 +135,15 @@ export function App() {
     setTimeout(() => setTriggerIntegrationAgenticModal(false), 100);
   };
 
-  // Test database connection on component mount
+  // Load project data and test database connection on component mount
   useEffect(() => {
-    const testConnection = async () => {
+    const loadData = async () => {
       try {
+        // Load project data for progress percentages
+        const projects = await ApiService.getProjectSynopsisData();
+        setProjectData(projects);
+        console.log('✅ Project data loaded for progress tracking:', projects.length, 'projects');
+        
         // Test the actual endpoint we're using for At a Glance
         const workDetails = await ApiService.getCustomerCapitalWorkDetails();
         setDbConnectionStatus(workDetails && workDetails.length > 0 ? 'connected' : 'error');
@@ -144,8 +153,71 @@ export function App() {
       }
     };
     
-    testConnection();
+    loadData();
   }, []);
+
+  // Helper function to get progress percentage for a project
+  const getProjectProgress = (projectTitle: string): number => {
+    if (!projectData || projectData.length === 0) {
+      // Return default values if no data loaded yet
+      const defaults: { [key: string]: number } = {
+        'Price Grab': 60,
+        'RAG-Service': 70,
+        'GA Insights': 45,
+        'Finance Automation': 35,
+        'Data Warehouse': 20,
+        'HR Automation': 15,
+        'CX Agentic Framework': 25,
+        'Integration - Agentic Framework': 20
+      };
+      return defaults[projectTitle] || 0;
+    }
+
+    // Find the project by title
+    let targetProject = null;
+    if (projectTitle === 'Price Grab') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('price grab') ||
+        project.project_name.toLowerCase().includes('competitive pricing') ||
+        project.project_name.toLowerCase().includes('price')
+      );
+    } else if (projectTitle === 'RAG-Service') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('rag') || 
+        project.project_name.toLowerCase().includes('retrieval')
+      );
+    } else if (projectTitle === 'GA Insights') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('ga dashboard') ||
+        project.project_name.toLowerCase().includes('ga')
+      );
+    } else if (projectTitle === 'Finance Automation') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('finance automation')
+      );
+    } else if (projectTitle === 'Data Warehouse') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('datawarehouse') ||
+        project.project_name.toLowerCase().includes('data warehouse')
+      );
+    } else if (projectTitle === 'HR Automation') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('hr automation') ||
+        project.project_name.toLowerCase().includes('hr')
+      );
+    } else if (projectTitle === 'CX Agentic Framework') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('cx agentic framework')
+      );
+    } else if (projectTitle === 'Integration - Agentic Framework') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('integration') || 
+        project.project_name.toLowerCase().includes('agentic framework')
+      );
+    }
+
+    return targetProject ? targetProject.progress_percentage || 0 : 0;
+  };
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
@@ -252,7 +324,7 @@ export function App() {
               icon={<SearchIcon size={24} />}
               color="bg-blue-500"
               stats={{
-                value: "60%",
+                value: `${getProjectProgress('Price Grab')}%`,
                 label: "Progress"
               }}
               change={{
@@ -270,7 +342,7 @@ export function App() {
               icon={<DatabaseIcon size={24} />}
               color="bg-green-500"
               stats={{
-                value: "70%",
+                value: `${getProjectProgress('RAG-Service')}%`,
                 label: "Progress"
               }}
               change={{
@@ -288,7 +360,7 @@ export function App() {
               icon={<BarChart3Icon size={24} />}
               color="bg-purple-500"
               stats={{
-                value: "45%",
+                value: `${getProjectProgress('GA Insights')}%`,
                 label: "Progress"
               }}
               change={{
@@ -306,7 +378,7 @@ export function App() {
               icon={<DollarSignIcon size={24} />}
               color="bg-emerald-500"
               stats={{
-                value: "35%",
+                value: `${getProjectProgress('Finance Automation')}%`,
                 label: "Progress"
               }}
               change={{
@@ -324,7 +396,7 @@ export function App() {
               icon={<DatabaseIcon size={24} />}
               color="bg-orange-500"
               stats={{
-                value: "20%",
+                value: `${getProjectProgress('Data Warehouse')}%`,
                 label: "Progress"
               }}
               change={{
@@ -342,7 +414,7 @@ export function App() {
               icon={<UsersIcon size={24} />}
               color="bg-indigo-500"
               stats={{
-                value: "15%",
+                value: `${getProjectProgress('HR Automation')}%`,
                 label: "Progress"
               }}
               change={{
@@ -360,7 +432,7 @@ export function App() {
               icon={<MessageSquareIcon size={24} />}
               color="bg-teal-500"
               stats={{
-                value: "25%",
+                value: `${getProjectProgress('CX Agentic Framework')}%`,
                 label: "Progress"
               }}
               change={{
@@ -378,7 +450,7 @@ export function App() {
               icon={<DatabaseIcon size={24} />}
               color="bg-cyan-500"
               stats={{
-                value: "20%",
+                value: `${getProjectProgress('Integration - Agentic Framework')}%`,
                 label: "Progress"
               }}
               change={{

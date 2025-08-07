@@ -23,7 +23,8 @@
       "notes": "Proposal submitted and pending approval.",
       "created_at": "2025-08-06 11:30:47",
       "updated_at": "2025-08-06 11:30:47",
-      "date_updated": "06/08/2025"
+      "date_updated": "06/08/2025",
+      "mode": null
     },
     {
       "id": 2,
@@ -46,8 +47,9 @@
       "challenges": "No Updates received from CC post submission of proposal",
       "notes": "Proposal submitted on 09/Jun/25\r\nStill under review with CC team till date",
       "created_at": "2025-08-06 11:30:47",
-      "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "Development"
     },
     {
       "id": 3,
@@ -71,7 +73,8 @@
       "notes": "Procurement of requisite infra in progress",
       "created_at": "2025-08-06 11:30:47",
       "updated_at": "2025-08-06 13:37:32",
-      "date_updated": "08/06/2025"
+      "date_updated": "08/06/2025",
+      "mode": null
     },
     {
       "id": 4,
@@ -84,7 +87,7 @@
       "due_date": null,
       "start_date": null,
       "end_date": null,
-      "progress_percentage": 35,
+      "progress_percentage": 95,
       "budget": null,
       "actual_cost": null,
       "purpose": "Automate the calculations being done for HDFC using manual excel macros to maintain vendor cost master, MOP and selling margins to assist in sales and margin reporting and revenue tracking (sales/refunds)",
@@ -94,8 +97,9 @@
       "challenges": "1. Input report layouts still being finalized for FYND and Payment gateway\r\n2. Input test data for Payables automation still pending with CC team\r\n3. Change requests coming in on ad-hoc basis as the system is being tested in UAT",
       "notes": "UAT delivery - 18/Jul/25",
       "created_at": "2025-08-06 11:30:47",
-      "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "UAT"
     },
     {
       "id": 5,
@@ -108,7 +112,7 @@
       "due_date": null,
       "start_date": null,
       "end_date": null,
-      "progress_percentage": 70,
+      "progress_percentage": 80,
       "budget": null,
       "actual_cost": null,
       "purpose": "The RAG-Service enables users to upload PDF, Word, text, Excel, or PowerPoint documents and query their content for enhanced information retrieval and analysis.\r\n\r\nIntent is to create a virtual agents / service which can be leveraged to support activities like learning, customer support etc to boost employee productivity",
@@ -118,8 +122,9 @@
       "challenges": "Achieves accuracies above 95%, with additional testing required to ensure reliability.",
       "notes": "POC - UAT in progress. ETA - 21st Aug",
       "created_at": "2025-08-06 11:30:47",
-      "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "UAT"
     },
     {
       "id": 6,
@@ -132,7 +137,7 @@
       "due_date": null,
       "start_date": null,
       "end_date": null,
-      "progress_percentage": 45,
+      "progress_percentage": 90,
       "budget": null,
       "actual_cost": null,
       "purpose": "The GA dashboards enables users to visualise the different metrics using the GA4 data and transactional data from databases such as MySql and Postgres.",
@@ -142,8 +147,9 @@
       "challenges": "Dashboard - HDFC - KPI's scoping in progress with CC team. Fynd and Payment reports still under finalization with CC\r\n\r\nTransction DB for other staccs - Replication cost and approval still under discussion internally by CC team\r\n\r\nImprovements Done  - Bigquery Support added to improve performance of Dashboards to overcome postrgres technical syncing issues\r\n\r\nPotential Risks - Website updates will lead to data mapping issues causing incorrect data to be reflected in Dashboards. Potential issue with UI changes impacting GA\r\n",
       "notes": "Live Dashboards - 1 (Tripstacc)\r\nReady for Go Live - 1 (Shopstacc)\r\nUnder Internal Review - 2 (ET, BOM)\r\nIn UAT - 1 (BOB)\r\nRequirement Scoping - 1 (HDFC)\r\nEmail Scheduler - Live",
       "created_at": "2025-08-06 11:30:47",
-      "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "UAT"
     },
     {
       "id": 7,
@@ -156,7 +162,7 @@
       "due_date": null,
       "start_date": null,
       "end_date": null,
-      "progress_percentage": 25,
+      "progress_percentage": 20,
       "budget": null,
       "actual_cost": null,
       "purpose": "Boost productivity for CX Agents on ground by having customer CRM data accessible easily and faster",
@@ -166,8 +172,9 @@
       "challenges": "Possible Challenges -\r\n1. Would require replication of existing transaction DB's which will incur cost for CC\r\n2. If DB approach is ruled out then screen scrapping would not be appropriate for accuracy of data capture\r\n3. Data Security perspective to be reviewed with CC team (Rajeev / Kunal) if agent ID's could be created to export reports on a scheduled basis",
       "notes": "Initial risk and requirement scoping in progress",
       "created_at": "2025-08-06 11:44:06",
-      "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "Development"
     },
     {
       "id": 8,
@@ -191,7 +198,8 @@
       "notes": "Initial risk and requirement scoping in progress",
       "created_at": "2025-08-06 11:44:12",
       "updated_at": "2025-08-06 13:37:32",
-      "date_updated": "08/06/2025"
+      "date_updated": "08/06/2025",
+      "mode": null
     },
     {
       "id": 9,
@@ -204,7 +212,7 @@
       "due_date": null,
       "start_date": null,
       "end_date": null,
-      "progress_percentage": 60,
+      "progress_percentage": 90,
       "budget": null,
       "actual_cost": null,
       "purpose": "The software aggregates and compares prices from Amazon, Flipkart, Croma, and Reliance to optimize pricing strategies for enhanced marketability.",
@@ -214,8 +222,9 @@
       "challenges": "Overcomes Amazon's bot detection algorithms using IP rotation and CAPTCHA-solving techniques to discreetly scrape prices.\r\n\r\nOutstanding Items - Input files awaited from CC(Ganesh) for remaining portals.",
       "notes": "Proposal submitted and pending approval.",
       "created_at": "2025-08-06 13:37:32",
-      "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "UAT"
     },
     {
       "id": 10,
@@ -239,7 +248,8 @@
       "notes": "Procurement of requisite infra in progress",
       "created_at": "2025-08-06 13:54:57",
       "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "date_updated": "08/06/2025",
+      "mode": null
     },
     {
       "id": 11,
@@ -263,9 +273,60 @@
       "notes": "Initial risk and requirement scoping in progress",
       "created_at": "2025-08-06 13:54:57",
       "updated_at": "2025-08-06 13:54:57",
-      "date_updated": "08/06/2025"
+      "date_updated": "08/06/2025",
+      "mode": null
+    },
+    {
+      "id": 12,
+      "project_name": "Datawarehouse",
+      "description": "Provide Agentic support for L1 screening and parsing of resume to help shortlist interview candidates for recruitment",
+      "status": "development",
+      "priority": "medium",
+      "assigned_to": "Denesh",
+      "eta": "December 1, 2025",
+      "due_date": null,
+      "start_date": null,
+      "end_date": null,
+      "progress_percentage": 30,
+      "budget": null,
+      "actual_cost": null,
+      "purpose": "Provide Agentic support for L1 screening and parsing of resume to help shortlist interview candidates for recruitment",
+      "actionable_data": "Agent to provide facility to generate Job Descriptions for various roles and implement a mathematical model to calculate the profile fitment score against the job posting",
+      "go_live_date": "Scheduled for December 1, 2025.",
+      "contact_points": "CC - Kunal/Sourabh Kala ; ST - Dr Venkat",
+      "challenges": "Project challenges and technical requirements.",
+      "notes": "Procurement of requisite infra in progress",
+      "created_at": "2025-08-07 01:40:40",
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "Development"
+    },
+    {
+      "id": 13,
+      "project_name": "CX Agentic Framework",
+      "description": "Boost productivity for CX Agents on ground by having customer CRM data accessible easily and faster",
+      "status": "development",
+      "priority": "high",
+      "assigned_to": "Integration Team",
+      "eta": "February 1, 2026",
+      "due_date": null,
+      "start_date": null,
+      "end_date": null,
+      "progress_percentage": 20,
+      "budget": null,
+      "actual_cost": null,
+      "purpose": "Boost productivity for CX Agents on ground by having customer CRM data accessible easily and faster",
+      "actionable_data": "Provide an integrated UI to the CX Agent on ground to simplify the way to identify the originating customer and retrieve their respective transactional data without searching across multiple portals",
+      "go_live_date": "Scheduled for February 1, 2026.",
+      "contact_points": "CC - Nishit Gandhi ; ST - Deva / Abhinav",
+      "challenges": "Possible Challenges -\r\n1. Would require replication of existing transaction DB's which will incur cost for CC\r\n2. If DB approach is ruled out then screen scrapping would not be appropriate for accuracy of data capture\r\n3. Data Security perspective to be reviewed with CC team (Rajeev / Kunal) if agent ID's could be created to export reports on a scheduled basis",
+      "notes": "Initial risk and requirement scoping in progress",
+      "created_at": "2025-08-07 01:40:40",
+      "updated_at": "2025-08-07 01:40:40",
+      "date_updated": "08/06/2025",
+      "mode": "Development"
     }
   ],
-  "timestamp": "2025-08-06T14:20:53.358Z",
-  "total": 11
+  "timestamp": "2025-08-07T01:44:33.795Z",
+  "total": 13
 }

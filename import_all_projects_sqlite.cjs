@@ -169,7 +169,9 @@ function importProject(project, index) {
       go_live_date: `Scheduled for ${project.defaultData.eta}.`,
       contact_points: `${project.defaultData.assigned_to} from Customer Capital; Dr. Venkat from Shepardtri.`,
       challenges: 'Project challenges and technical requirements.',
-      notes: 'Project status and notes.'
+      notes: 'Project status and notes.',
+      progress_percentage: project.defaultData.progress_percentage,
+      mode: 'Development' // Default mode
     };
     
     // Parse the key-value data
@@ -193,6 +195,17 @@ function importProject(project, index) {
           projectData.challenges = value;
         } else if (description.includes('status')) {
           projectData.notes = value;
+        } else if (description.includes('progress')) {
+          // Convert progress from decimal (0.9) to percentage (90)
+          console.log(`📊 Processing progress for ${project.name}: "${value}"`);
+          const progressValue = parseFloat(value);
+          if (!isNaN(progressValue)) {
+            projectData.progress_percentage = Math.round(progressValue * 100);
+          }
+        } else if (description.includes('mode')) {
+          // Extract mode value
+          console.log(`🎯 Processing mode for ${project.name}: "${value}"`);
+          projectData.mode = value.trim();
         } else if (description.includes('date updated')) {
           // Convert Excel date serial number to readable date
           console.log(`📅 Processing date_updated for ${project.name}: "${value}"`);
@@ -232,7 +245,7 @@ function updateProject(id, projectData, resolve) {
       project_name = ?, description = ?, status = ?, priority = ?,
       assigned_to = ?, eta = ?, progress_percentage = ?, purpose = ?,
       actionable_data = ?, go_live_date = ?, contact_points = ?,
-      challenges = ?, notes = ?, date_updated = ?, updated_at = CURRENT_TIMESTAMP
+      challenges = ?, notes = ?, date_updated = ?, mode = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `;
 
@@ -251,6 +264,7 @@ function updateProject(id, projectData, resolve) {
     projectData.challenges,
     projectData.notes,
     projectData.date_updated || '06/08/2025',
+    projectData.mode,
     id
   ];
 
@@ -269,8 +283,8 @@ function insertProject(projectData, resolve) {
     INSERT INTO Project_Synopsis (
       project_name, description, status, priority, assigned_to, eta,
       progress_percentage, purpose, actionable_data, go_live_date,
-      contact_points, challenges, notes, date_updated
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      contact_points, challenges, notes, date_updated, mode
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const params = [
@@ -287,7 +301,8 @@ function insertProject(projectData, resolve) {
     projectData.contact_points,
     projectData.challenges,
     projectData.notes,
-    projectData.date_updated || '06/08/2025'
+    projectData.date_updated || '06/08/2025',
+    projectData.mode
   ];
 
   db.run(insertSQL, params, function(err) {

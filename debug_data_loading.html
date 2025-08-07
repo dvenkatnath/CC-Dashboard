@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Data Loading</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Data Loading</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Project Synopsis Data</h2>
+        <button onclick="testProjectSynopsis()">Test Project Synopsis</button>
+        <div id="project-synopsis-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Customer Capital Work Details</h2>
+        <button onclick="testWorkDetails()">Test Work Details</button>
+        <div id="work-details-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Direct JSON File Access</h2>
+        <button onclick="testDirectAccess()">Test Direct Access</button>
+        <div id="direct-access-result"></div>
+    </div>
+
+    <script>
+        async function testProjectSynopsis() {
+            const resultDiv = document.getElementById('project-synopsis-result');
+            resultDiv.innerHTML = '<div class="loading">⏳ Testing project synopsis data...</div>';
+            
+            try {
+                const response = await fetch('/project-synopsis.json');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Project Synopsis loaded successfully!<br>
+                            📊 Found ${data.data.length} projects<br>
+                            📋 Project names: ${data.data.map(p => p.project_name).join(', ')}
+                        </div>
+                        <pre>${JSON.stringify(data.data.slice(0, 3), null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Invalid data structure: ${JSON.stringify(data)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error loading project synopsis: ${error.message}</div>`;
+            }
+        }
+        
+        async function testWorkDetails() {
+            const resultDiv = document.getElementById('work-details-result');
+            resultDiv.innerHTML = '<div class="loading">⏳ Testing work details data...</div>';
+            
+            try {
+                const response = await fetch('/customer-capital-work-details.json');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Work Details loaded successfully!<br>
+                            📊 Found ${data.data.length} work items<br>
+                            📋 First few descriptions: ${data.data.slice(0, 3).map(w => w.description.substring(0, 50) + '...').join(', ')}
+                        </div>
+                        <pre>${JSON.stringify(data.data.slice(0, 3), null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Invalid data structure: ${JSON.stringify(data)}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error loading work details: ${error.message}</div>`;
+            }
+        }
+        
+        async function testDirectAccess() {
+            const resultDiv = document.getElementById('direct-access-result');
+            resultDiv.innerHTML = '<div class="loading">⏳ Testing direct file access...</div>';
+            
+            try {
+                // Test if files exist
+                const files = ['/project-synopsis.json', '/customer-capital-work-details.json'];
+                const results = [];
+                
+                for (const file of files) {
+                    try {
+                        const response = await fetch(file);
+                        if (response.ok) {
+                            const data = await response.json();
+                            results.push(`✅ ${file} - OK (${data.data ? data.data.length : 'no data'} items)`);
+                        } else {
+                            results.push(`❌ ${file} - HTTP ${response.status}`);
+                        }
+                    } catch (error) {
+                        results.push(`❌ ${file} - Error: ${error.message}`);
+                    }
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h3>File Access Results:</h3>
+                        ${results.map(r => `<div>${r}</div>`).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error testing direct access: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.onload = function() {
+            setTimeout(testProjectSynopsis, 500);
+            setTimeout(testWorkDetails, 1000);
+            setTimeout(testDirectAccess, 1500);
+        };
+    </script>
+</body>
+</html> 
