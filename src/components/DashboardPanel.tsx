@@ -96,7 +96,7 @@ export function DashboardPanel({
 
   // Fetch project data when component loads or modal opens
   useEffect(() => {
-    if ((title === 'Price Grab' || title === 'RAG-Service' || title === 'GA Insights' || title === 'Finance Automation' || title === 'Data Warehouse' || title === 'HR Automation' || title === 'CX Agentic Framework' || title === 'Integration - Agentic Framework') && !projectData) {
+    if ((title === 'Price Grab' || title === 'RAG-Service' || title === 'GA Insights' || title === 'Finance Automation' || title === 'Data Warehouse' || title === 'HR Automation' || title === 'CX Agentic Framework' || title === 'Integration - Agentic Framework' || title === 'dataTalk') && !projectData) {
       const fetchProjectSynopsisData = async () => {
         setIsLoading(true);
         try {

@@ -174,7 +174,8 @@ export function App() {
         'Data Warehouse': 20,
         'HR Automation': 15,
         'CX Agentic Framework': 25,
-        'Integration - Agentic Framework': 20
+        'Integration - Agentic Framework': 20,
+        'dataTalk': 85
       };
       return defaults[projectTitle] || 0;
     }
@@ -219,6 +220,11 @@ export function App() {
       targetProject = projectData.find((project: any) => 
         project.project_name.toLowerCase().includes('integration') || 
         project.project_name.toLowerCase().includes('agentic framework')
+      );
+    } else if (projectTitle === 'dataTalk') {
+      targetProject = projectData.find((project: any) => 
+        project.project_name.toLowerCase().includes('datatalk') ||
+        project.project_name.toLowerCase().includes('data talk')
       );
     }
 
