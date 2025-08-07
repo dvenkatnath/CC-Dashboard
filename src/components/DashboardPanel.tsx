@@ -74,6 +74,19 @@ export function DashboardPanel({
     }
   };
 
+  const getModeColor = (mode: string) => {
+    switch (mode?.toLowerCase()) {
+      case 'development':
+        return 'bg-blue-500';
+      case 'uat':
+        return 'bg-amber-500';
+      case 'implemented':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
   // Watch for triggerModal prop to open modal from outside
   useEffect(() => {
     if (triggerModal && !showDetails) {
@@ -270,7 +283,7 @@ export function DashboardPanel({
         <h3 className="font-semibold text-lg text-gray-800 mb-1">{title}</h3>
         <p className="text-gray-500 text-sm mb-4">{description}</p>
         <div className="mb-4 flex items-center gap-2">
-          <span className={`inline-block w-3 h-3 rounded-full ${getStatusColor(currentStatus)}`}></span>
+          <span className={`inline-block w-3 h-3 rounded-full ${getModeColor(projectMode)}`}></span>
           <span className="text-sm font-medium text-gray-700">
             Mode: {projectMode}
           </span>
